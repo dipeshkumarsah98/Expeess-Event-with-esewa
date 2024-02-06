@@ -4,8 +4,32 @@ import ValidationError from "../errors/validationError.error.js";
 import createSignature from "../utils/signature.js";
 import handleEsewaSuccess from "../middleware/handleEsewaSuccess.js";
 import db from "../config/db.config.js";
+import {
+  sendOrderComplete,
+  sendWelcome,
+  sendPaymentComplete,
+} from "../services/mailer.service.js";
 
 const apiRouter = Router();
+
+apiRouter.get("/", async (req, res) => {
+  await sendWelcome({ name: "dipesh", email: "dipesh@mailinator.com" });
+  await sendOrderComplete({
+    name: "dipesh",
+    email: "dipesh@mailinator.com",
+    orderId: "123",
+  });
+  await sendPaymentComplete({
+    name: "dipesh",
+    orderId: "123",
+    amount: "100",
+    email: "dipesh@mailinator.com",
+  });
+
+  res.json(
+    successResponse(200, "Ok", "Welcome to msg send to dipesh@mailinator.com")
+  );
+});
 
 apiRouter.post("/create/order", async (req, res) => {
   console.log(req.body);

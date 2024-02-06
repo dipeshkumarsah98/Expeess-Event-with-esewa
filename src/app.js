@@ -8,6 +8,7 @@ import errorHandler from "./middleware/errorHandler.middleware.js";
 import { corsHandler } from "./middleware/cors.middleware.js";
 import db from "./config/db.config.js";
 import apiRouter from "./routes/index.js";
+import cors from "cors";
 
 dotenv.config();
 
@@ -16,7 +17,8 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(corsHandler);
+// app.use(corsHandler);
+app.use(cors());
 app.use("/api/v1", apiRouter); // All the routes will be prefixed with /api
 
 app.get("/", (req, res) => {

@@ -13,17 +13,13 @@ import {
 const apiRouter = Router();
 
 apiRouter.get("/", async (req, res) => {
-  await sendWelcome({ name: "dipesh", email: "dipesh@mailinator.com" });
-  await sendOrderComplete({
-    name: "dipesh",
-    email: "dipesh@mailinator.com",
-    orderId: "123",
+  sendWelcome({
+    email: "wileh43397@huizk.com",
   });
-  await sendPaymentComplete({
+  sendOrderComplete({
     name: "dipesh",
+    email: "wileh43397@huizk.com",
     orderId: "123",
-    amount: "100",
-    email: "dipesh@mailinator.com",
   });
 
   res.json(
@@ -33,14 +29,22 @@ apiRouter.get("/", async (req, res) => {
 
 apiRouter.post("/create/order", async (req, res) => {
   console.log(req.body);
+  // address       String?
+  // height        String?
+  // weight        String?
+  // contactNumber String?
   if (
     !req.body.amount ||
     !req.body.name ||
     !req.body.email ||
-    !req.body.offerType
+    !req.body.offerType ||
+    !req.body.address ||
+    !req.body.height ||
+    !req.body.weight ||
+    !req.body.phone
   ) {
     throw new ValidationError(
-      "Invalid Request, amount, name, email and offerType is required field",
+      "Invalid request body, Please provide all the required fields ( amount, name, email, offerType, address, height, weight, phone )",
       "Invalid Request"
     );
   }
@@ -56,6 +60,10 @@ apiRouter.post("/create/order", async (req, res) => {
         email: req.body.email,
         isPaid: false,
         offerType: req.body.offerType,
+        address: req.body.address,
+        height: req.body.height,
+        weight: req.body.weight,
+        contactNumber: req.body.phone,
       },
     });
 
@@ -98,6 +106,26 @@ apiRouter.get("/esewa/success", handleEsewaSuccess, async (req, res) => {
       },
     });
     res.json(successResponse(200, "Ok", user));
+  } catch (error) {
+    throw new ValidationError("Error Occured", error);
+  }
+});
+
+apiRouter.get("/records", async (req, res) => {
+  try {
+    const result = await db.user.groupBy({
+      by: ["offerType"],
+      _count: {
+        _all: true,
+      },
+      where: {
+        isPaid: false,
+        offerType: {
+          not: null,
+        },
+      },
+    });
+    res.json(successResponse(200, "Ok", result));
   } catch (error) {
     throw new ValidationError("Error Occured", error);
   }

@@ -7,8 +7,8 @@ const MailGenerator = new Mailgen({
   theme: "default",
   product: {
     name: `${APP_NAME}`,
-    link: "https://mailgen.js/",
-    copyright: `Copyright © 2023 ${APP_NAME}. All rights reserved.`,
+    link: "https://phasezeroclothing.com/",
+    copyright: `Copyright © 2024 ${APP_NAME}. All rights reserved.`,
   },
 });
 
@@ -33,9 +33,15 @@ export function sendOrderCompleteTemplate(orderCompleteMailerDto) {
   const template = {
     body: {
       name,
-      title: `Order Confirmation for Order ID: ${orderId}`,
-      intro: `Your order has been successfully placed.`,
-      outro: "Thank you for shopping with us",
+      intro: "Welcome to Phasezero! We're very excited to have you on board.",
+      action: {
+        instructions: "To get started with Mailgen, please click here:",
+        button: {
+          color: "#22BC66", // Optional action button color
+          text: orderId,
+        },
+      },
+      signature: false,
     },
   };
   return MailGenerator.generate(template);

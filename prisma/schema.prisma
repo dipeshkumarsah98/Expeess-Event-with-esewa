@@ -9,14 +9,18 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
+// basic, gold, preminum
 model User {
   id            String @id @default(uuid())
   name          String?
-  email         String?
+  email         String? @unique
   offerType     String?
   amount        Int?
   isPaid        Boolean? @default(false)
+  address       String?
+  height        String?
+  weight        String?
+  contactNumber String?
   transactionCode String?
 
   @@map("users")

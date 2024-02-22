@@ -33,7 +33,7 @@ const processOrderCompleteJob = async (job) => {
     const message = {
       from: EMAIL_ADDRESS,
       to: job.data.email,
-      subject: `Givewary confirmation PHASEZERO`,
+      subject: `Giveaway confirmation PHASEZERO`,
       html: sendOrderCompleteTemplate(job.data),
     };
     return await mailer.sendMail(message);

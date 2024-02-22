@@ -44,6 +44,7 @@ export function sendOrderCompleteTemplate(orderCompleteMailerDto) {
       //     text: orderId,
       //   },
       // },
+      outro: false,
     },
   };
   return MailGenerator.generate(template);

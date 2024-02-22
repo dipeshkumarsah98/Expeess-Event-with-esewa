@@ -35,7 +35,8 @@ export function sendOrderCompleteTemplate(orderCompleteMailerDto) {
       name,
       intro: "Welcome to Phasezero! We're very excited to have you on board.",
       action: {
-        instructions: "To get started with Mailgen, please click here:",
+        instructions:
+          "Your order has been placed successfully. Here's your transaction code:",
         button: {
           color: "#22BC66", // Optional action button color
           text: orderId,

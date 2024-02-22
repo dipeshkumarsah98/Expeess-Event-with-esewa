@@ -28,11 +28,6 @@ apiRouter.get("/", async (req, res) => {
 });
 
 apiRouter.post("/create/order", async (req, res) => {
-  console.log(req.body);
-  // address       String?
-  // height        String?
-  // weight        String?
-  // contactNumber String?
   if (
     !req.body.amount ||
     !req.body.name ||
@@ -48,33 +43,31 @@ apiRouter.post("/create/order", async (req, res) => {
       "Invalid Request"
     );
   }
-
-  const baseUrl = process.env.BASE_URL || "http://localhost:8000";
   const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
-
   try {
-    const u = await db.user.findUnique({ where: { email: req.body.email } });
-    console.log("🚀 ~ apiRouter.post ~ u:", u);
-    if (u) {
+    let user = await db.user.findUnique({ where: { email: req.body.email } });
+    if (user && user.isPaid === true) {
       throw new ValidationError(
         "User already exists with the email",
         "User Exists"
       );
     }
 
-    const user = await db.user.create({
-      data: {
-        amount: req.body.amount,
-        name: req.body.name,
-        email: req.body.email,
-        isPaid: false,
-        offerType: req.body.offerType,
-        address: req.body.address,
-        height: req.body.height,
-        weight: req.body.weight,
-        contactNumber: req.body.phone,
-      },
-    });
+    if (user === null) {
+      user = await db.user.create({
+        data: {
+          amount: req.body.amount,
+          name: req.body.name,
+          email: req.body.email,
+          isPaid: false,
+          offerType: req.body.offerType,
+          address: req.body.address,
+          height: req.body.height,
+          weight: req.body.weight,
+          contactNumber: req.body.phone,
+        },
+      });
+    }
 
     const uuid = user.id;
 
@@ -115,6 +108,13 @@ apiRouter.get("/esewa/success", handleEsewaSuccess, async (req, res) => {
         transactionCode: transaction_code,
       },
     });
+
+    sendOrderComplete({
+      name: user.name,
+      email: user.email,
+      orderId: transaction_code,
+    });
+
     res.json(successResponse(200, "Ok", user));
   } catch (error) {
     throw new ValidationError(error.message || "Error Occured", error);

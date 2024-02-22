@@ -18,8 +18,6 @@ const handleEsewaSuccess = (req, res, next) => {
       .map((field) => `${field}=${decodedData[field] || ""}`)
       .join(",");
 
-    console.log(message);
-
     const signature = createSignature(message);
     if (signature !== decodedData?.signature) {
       res.json({ message: "Payment Failed" });

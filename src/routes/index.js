@@ -45,29 +45,19 @@ apiRouter.post("/create/order", async (req, res) => {
   }
   const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
   try {
-    let user = await db.user.findUnique({ where: { email: req.body.email } });
-    if (user && user.isPaid === true) {
-      throw new ValidationError(
-        "User already exists with the email",
-        "User Exists"
-      );
-    }
-
-    if (user === null) {
-      user = await db.user.create({
-        data: {
-          amount: req.body.amount,
-          name: req.body.name,
-          email: req.body.email,
-          isPaid: false,
-          offerType: req.body.offerType,
-          address: req.body.address,
-          height: req.body.height,
-          weight: req.body.weight,
-          contactNumber: req.body.phone,
-        },
-      });
-    }
+    user = await db.user.create({
+      data: {
+        amount: req.body.amount,
+        name: req.body.name,
+        email: req.body.email,
+        isPaid: false,
+        offerType: req.body.offerType,
+        address: req.body.address,
+        height: req.body.height,
+        weight: req.body.weight,
+        contactNumber: req.body.phone,
+      },
+    });
 
     const uuid = user.id;
 

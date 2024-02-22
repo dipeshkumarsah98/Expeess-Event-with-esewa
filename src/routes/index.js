@@ -1,31 +1,30 @@
 import { Router } from "express";
+import { sendOrderComplete } from "../services/mailer.service.js";
 import successResponse from "../utils/successResponse.js";
 import ValidationError from "../errors/validationError.error.js";
 import createSignature from "../utils/signature.js";
 import handleEsewaSuccess from "../middleware/handleEsewaSuccess.js";
 import db from "../config/db.config.js";
-import {
-  sendOrderComplete,
-  sendWelcome,
-  sendPaymentComplete,
-} from "../services/mailer.service.js";
 
 const apiRouter = Router();
 
-apiRouter.get("/", async (req, res) => {
-  sendWelcome({
-    email: "wileh43397@huizk.com",
-  });
-  sendOrderComplete({
-    name: "dipesh",
-    email: "wileh43397@huizk.com",
-    orderId: "123",
-  });
+// apiRouter.get("/", async (req, res) => {
+//   sendOrderComplete({
+//     name: "dipesh",
+//     email: "dipesh@mailinator.com",
+//     orderId: "5k",
+//   });
 
-  res.json(
-    successResponse(200, "Ok", "Welcome to msg send to dipesh@mailinator.com")
-  );
-});
+//   res.json(
+//     successResponse(200, "Ok", "Welcome to msg send to wileh43397@huizk.com")
+//   );
+// });
+
+const userLimit = {
+  basic: 2024,
+  gold: 400,
+  premium: 200,
+};
 
 apiRouter.post("/create/order", async (req, res) => {
   if (
@@ -44,8 +43,50 @@ apiRouter.post("/create/order", async (req, res) => {
     );
   }
   const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+  const productCode = process.env.ESEWA_PRODUCT_CODE || "EPAYTEST";
   try {
-    user = await db.user.create({
+    const numberOfRecords = await db.user.groupBy({
+      by: ["offerType"],
+      _count: {
+        _all: true,
+      },
+      where: {
+        isPaid: true,
+        offerType: {
+          not: null,
+        },
+      },
+    });
+
+    // check where userLimit is exceeded comparing with the offerType
+    if (numberOfRecords.length > 0) {
+      const offerType = req.body.offerType.toLocaleLowerCase();
+      // check offerType is valid or not
+      const limitCount = userLimit[offerType];
+
+      if (limitCount === undefined) {
+        throw new ValidationError(
+          `Invalid offer type ${offerType}`,
+          "Invalid Offer Type"
+        );
+      }
+      // find offer in the numberOfRecords
+      const offerTypeCount = numberOfRecords.find(
+        (record) => record.offerType.toLocaleLowerCase() === offerType
+      );
+
+      if (
+        offerTypeCount !== undefined &&
+        offerTypeCount._count._all >= limitCount
+      ) {
+        throw new ValidationError(
+          `User limit exceeded for ${offerType} offer type`,
+          "User Limit Exceeded"
+        );
+      }
+    }
+
+    const user = await db.user.create({
       data: {
         amount: req.body.amount,
         name: req.body.name,
@@ -62,14 +103,14 @@ apiRouter.post("/create/order", async (req, res) => {
     const uuid = user.id;
 
     const signature = createSignature(
-      `total_amount=${req.body.amount},transaction_uuid=${uuid},product_code=EPAYTEST`
+      `total_amount=${req.body.amount},transaction_uuid=${uuid},product_code=${productCode}`
     );
     const formData = {
       amount: req.body.amount,
       failure_url: clientUrl,
       product_delivery_charge: "0",
       product_service_charge: "0",
-      product_code: "EPAYTEST",
+      product_code: productCode,
       signature: signature,
       signed_field_names: "total_amount,transaction_uuid,product_code",
       // success_url: `${baseUrl}/api/v1/esewa/success`,
@@ -98,11 +139,19 @@ apiRouter.get("/esewa/success", handleEsewaSuccess, async (req, res) => {
         transactionCode: transaction_code,
       },
     });
-
+    const { offerType } = user;
+    let worth;
+    if (offerType.toLocaleLowerCase() === "basic") {
+      worth = "5k";
+    } else if (offerType.toLocaleLowerCase() === "gold") {
+      worth = "10k";
+    } else {
+      worth = "15k";
+    }
     sendOrderComplete({
       name: user.name,
       email: user.email,
-      orderId: transaction_code,
+      orderId: worth,
     });
 
     res.json(successResponse(200, "Ok", user));

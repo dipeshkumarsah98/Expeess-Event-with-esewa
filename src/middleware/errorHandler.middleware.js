@@ -4,7 +4,6 @@ import CustomError from "../errors/custom.error.js";
 const errorHandler = (error, req, res, next) => {
   console.log(error.message);
   if (error instanceof CustomError) {
-    console.log("Yes it is a custom error");
     return res
       .status(error.statusCode)
       .json(errorResponse(error.message, error.statusCode));

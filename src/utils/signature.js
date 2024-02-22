@@ -1,7 +1,8 @@
 import crypto from "crypto";
 
 const createSignature = (message) => {
-  const secret = "8gBm/:&EnhH.1/q";
+  const secret = process.env.ESEWA_SECRET || "8gBm/:&EnhH.1/q";
+  console.log("🚀 ~ createSignature ~ secret:", secret);
 
   const hmac = crypto.createHmac("sha256", secret);
   hmac.update(message);

@@ -8,7 +8,6 @@ const handleEsewaSuccess = (req, res, next) => {
       Buffer.from(data, "base64").toString("utf-8")
     );
 
-    console.log(decodedData);
     if (decodedData?.status !== "COMPLETE") {
       return res.json({ message: "Payment Failed" });
     }

@@ -33,16 +33,17 @@ export function sendOrderCompleteTemplate(orderCompleteMailerDto) {
   const template = {
     body: {
       name,
-      intro: "Welcome to Phasezero! We're very excited to have you on board.",
-      action: {
-        instructions:
-          "Your order has been placed successfully. Here's your transaction code:",
-        button: {
-          color: "#22BC66", // Optional action button color
-          text: orderId,
-        },
-      },
-      signature: false,
+      intro: [
+        "Congratulations",
+        `Your slot has been confirmed for the mystery box worth ${orderId}`,
+      ],
+      // action: { instructions:
+      //     "Your order has been placed successfully. Here's your transaction code:",
+      //   button: {
+      //     color: "#22BC66", // Optional action button color
+      //     text: orderId,
+      //   },
+      // },
     },
   };
   return MailGenerator.generate(template);

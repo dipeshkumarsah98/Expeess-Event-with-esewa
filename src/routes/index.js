@@ -53,6 +53,15 @@ apiRouter.post("/create/order", async (req, res) => {
   const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
 
   try {
+    const u = await db.user.findUnique({ where: { email: req.body.email } });
+    console.log("🚀 ~ apiRouter.post ~ u:", u);
+    if (u) {
+      throw new ValidationError(
+        "User already exists with the email",
+        "User Exists"
+      );
+    }
+
     const user = await db.user.create({
       data: {
         amount: req.body.amount,
@@ -89,7 +98,8 @@ apiRouter.post("/create/order", async (req, res) => {
 
     res.json(successResponse(200, "Ok", { Product: req.body, formData }));
   } catch (error) {
-    throw new ValidationError("Error Occured", error);
+    console.log(error.message);
+    throw new ValidationError(error.message || "Error Occured", error);
   }
 });
 
@@ -107,7 +117,7 @@ apiRouter.get("/esewa/success", handleEsewaSuccess, async (req, res) => {
     });
     res.json(successResponse(200, "Ok", user));
   } catch (error) {
-    throw new ValidationError("Error Occured", error);
+    throw new ValidationError(error.message || "Error Occured", error);
   }
 });
 
@@ -119,7 +129,7 @@ apiRouter.get("/records", async (req, res) => {
         _all: true,
       },
       where: {
-        isPaid: false,
+        isPaid: true,
         offerType: {
           not: null,
         },

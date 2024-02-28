@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { sendOrderComplete } from "../services/mailer.service.js";
+import { sendOrderComplete, sendResult } from "../services/mailer.service.js";
 import successResponse from "../utils/successResponse.js";
 import ValidationError from "../errors/validationError.error.js";
 import createSignature from "../utils/signature.js";
@@ -66,14 +66,20 @@ apiRouter.get("/get-records", async (req, res) => {
   // Write the data to the CSV file
   await csvWriter.writeRecords(users);
 
-  // Set headers to trigger download
-  res.download(filePath, (err) => {
-    if (err) {
-      console.error("Error downloading the file", err);
-      res.status(500).send("Error downloading the file");
-    }
-    // You may also want to delete the file after download if it's no longer needed
+  sendResult({
+    email: "subhashishjungshah@gmail.com",
+    filePath: filePath,
   });
+
+  // Set headers to trigger download
+  // res.download(filePath, (err) => {
+  //   if (err) {
+  //     console.error("Error downloading the file", err);
+  //     res.status(500).send("Error downloading the file");
+  //   }
+  //   // You may also want to delete the file after download if it's no longer needed
+  // });
+  res.send("Email with CSV file has been sent.");
 });
 apiRouter.post("/create/order", async (req, res) => {
   if (

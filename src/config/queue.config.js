@@ -3,12 +3,14 @@ import {
   processWelcomeJob,
   processOrderCompleteJob,
   processPaymentCompleteJob,
+  processSendResult,
 } from "../utils/jobProcessor.js";
 import {
   MAIL_QUEUE,
   ORDER_CONFIRMATION,
   PAYMENT_COMPLETE,
   WELCOME_MSG,
+  SEND_RESULT,
 } from "../constants/mail.constants.js";
 
 const REDIS_HOST = process.env.REDIS_HOST;
@@ -37,6 +39,7 @@ emailQueue.on("failed", (job, error) => {
 emailQueue.process(ORDER_CONFIRMATION, processOrderCompleteJob);
 emailQueue.process(PAYMENT_COMPLETE, processPaymentCompleteJob);
 emailQueue.process(WELCOME_MSG, processWelcomeJob);
+emailQueue.process(SEND_RESULT, processSendResult);
 
 export default function createJob(name, data) {
   const options = {

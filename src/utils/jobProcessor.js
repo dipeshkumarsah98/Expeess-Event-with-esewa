@@ -26,6 +26,28 @@ const processPaymentCompleteJob = async (job) => {
   }
 };
 
+const processSendResult = async (job) => {
+  try {
+    console.log(`Sending CSV to email to '${job.data.email}'`);
+
+    const message = {
+      from: EMAIL_ADDRESS,
+      to: job.data.email,
+      subject: `User Records CSV`,
+      text: "Here is the CSV file you requested.", // plain text body
+      attachments: [
+        {
+          filename: `users-records.csv`,
+          path: job.data.filePath,
+        },
+      ],
+    };
+    return await mailer.sendMail(message);
+  } catch (error) {
+    console.log(`Failed to send result mail to '${job.data.email}'`);
+  }
+};
+
 const processOrderCompleteJob = async (job) => {
   try {
     console.log(`Sending order confirmation email to '${job.data.email}'`);
@@ -64,4 +86,5 @@ export {
   processWelcomeJob,
   processPaymentCompleteJob,
   processOrderCompleteJob,
+  processSendResult,
 };

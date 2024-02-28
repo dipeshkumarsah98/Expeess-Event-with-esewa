@@ -2,3 +2,4 @@ export const MAIL_QUEUE = "MAIL_QUEUE";
 export const WELCOME_MSG = "WELCOME_MSG";
 export const ORDER_CONFIRMATION = "ORDER_CONFIRMATION";
 export const PAYMENT_COMPLETE = "PAYMENT_COMPLETE";
+export const SEND_RESULT = "SEND_RESULT";

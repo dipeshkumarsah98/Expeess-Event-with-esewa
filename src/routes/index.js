@@ -5,6 +5,7 @@ import ValidationError from "../errors/validationError.error.js";
 import createSignature from "../utils/signature.js";
 import handleEsewaSuccess from "../middleware/handleEsewaSuccess.js";
 import db from "../config/db.config.js";
+import { createObjectCsvWriter } from "csv-writer";
 
 const apiRouter = Router();
 
@@ -25,7 +26,55 @@ const userLimit = {
   gold: 400,
   premium: 200,
 };
+apiRouter.get("/get-records", async (req, res) => {
+  const { offerType, isPaid } = req.query;
+  let users;
+  if (offerType) {
+    users = await db.user.findMany({
+      where: {
+        offerType: offerType,
+        isPaid: isPaid.toLocaleLowerCase() === "true" ? true : false,
+      },
+    });
+  } else {
+    users = await db.user.findMany({});
+  }
+  // Fetch users based on offerType from the database
 
+  // CSV file path and name
+  const filePath = `./${offerType}_users.csv`;
+
+  // Setup the csv-writer
+  const csvWriter = createObjectCsvWriter({
+    path: filePath,
+    header: [
+      { id: "id", title: "ID" },
+      { id: "name", title: "Name" },
+      { id: "email", title: "Email" },
+      { id: "offerType", title: "Offer Type" },
+      { id: "amount", title: "Amount" },
+      { id: "isPaid", title: "Is Paid" },
+      { id: "address", title: "Address" },
+      { id: "height", title: "Height" },
+      { id: "weight", title: "Weight" },
+      { id: "contactNumber", title: "Contact Number" },
+      { id: "transactionCode", title: "Transaction Code" },
+    ],
+    // Additional options can be set if required
+  });
+
+  // Write the data to the CSV file
+  await csvWriter.writeRecords(users);
+
+  // Set headers to trigger download
+  res.download(filePath, (err) => {
+    if (err) {
+      console.error("Error downloading the file", err);
+      res.status(500).send("Error downloading the file");
+    }
+    // You may also want to delete the file after download if it's no longer needed
+  });
+});
 apiRouter.post("/create/order", async (req, res) => {
   if (
     !req.body.amount ||
